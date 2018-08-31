@@ -1,5 +1,5 @@
 """
-Functions and Wrappers to define wavelet families.
+Functions and Wrappers to define families of kernels for signal analysis.
 
 Author: Ankit N. Khambhati
 Adapted from: https://github.com/pennmem/ptsa_new/blob/master/ptsa/wavelet.py
@@ -85,10 +85,16 @@ def morlet(freqs, cycles, Fs, n_win=7, complete=True):
     scale_ord = np.argsort(scales)
 
     wavelet_family = {
-        'wavelets': family[scale_ord],
-        'scales': scales[scale_ord],
-        'freqs': freqs[scale_ord],
-        'cycles': cycles[scale_ord]
+        'kernel': family[scale_ord],
+        'wavelet': {
+            'scales': scales[scale_ord],
+            'freqs': freqs[scale_ord],
+            'cycles': cycles[scale_ord]
+        },
+        'sample': {
+            'time': np.arange(max_len) / Fs
+        },
+        'axis_ord': np.array(['wavelet', 'sample'])
     }
 
     return wavelet_family
