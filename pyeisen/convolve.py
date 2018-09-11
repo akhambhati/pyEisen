@@ -3,14 +3,30 @@ Utilities for convolving families of kernels with data.
 
 Author: Ankit N. Khambhati
 Adapted from: https://github.com/pennmem/ptsa_new/blob/master/ptsa/wavelet.py
-Last Updated: 2018/08/31
+Last Updated: 2018/09/11
 """
 
 import numpy as np
-from scipy.signal import fftconvolve
+import scipy.fftpack
+
+try:
+    import pyfftw
+
+    def fft(*args, **kwargs):
+        return pyfftw.builders.fft(*args, **kwargs)()
+
+    def ifft(*args, **kwargs):
+        return pyfftw.builders.ifft(*args, **kwargs)()
+
+    print('Using `pyfftw`.')
+
+except ImportError as e:
+    fft = scipy.fftpack.fft
+    ifft = scipy.fftpack.ifft
+    print('Using `scipy.fftpack`.')
 
 
-def fconv(kernel, signal, boundary=None):
+def fconv(kernel, signal, boundary=None, fft=fft, ifft=ifft, interp_nan=True):
     """
     Convolve kernel bank with multidimensional signals using FFT.
 
@@ -22,11 +38,20 @@ def fconv(kernel, signal, boundary=None):
         Multidimensional signal array (must be two dimensional)
     boundary: {None, 'mirror'}
         Specifies how to handle the boundary of the signal.
+    fft/ifft: Function handles to a routine that calls fft.
+        By default, this code calls a wrapper around the pyfftw module.
+    interp_nan: bool
+        Specifies whether to return interpolated result or to add
+        NaNs back into the convolved signal.
 
     Returns
     -------
     arr_conv: np.ndarray, shape: [n_sample_2, n_kernel, n_signal]
     """
+
+    # Convert to complex types
+    kernel = np.asarray(kernel, dtype=complex)
+    signal = np.asarray(signal, dtype=complex)
 
     # get the number of signals and samples in each input
     n_sample_1, n_kernel = kernel.shape
@@ -41,15 +66,50 @@ def fconv(kernel, signal, boundary=None):
         signal = np.concatenate((signal_lead, signal, signal_lag))
         n_sample_2 = signal.shape[0]
 
-    # Pre-allocate array
-    n_s = n_sample_1 + n_sample_2 - 1
-    arr_conv = np.zeros((n_s, n_kernel, n_signal), dtype=np.complex)
-    for s_i in range(n_signal):
-        arr_conv[:, :, s_i] = fftconvolve(
-            kernel, signal[:, s_i].reshape(-1, 1), mode='full')
+    # Handle NaNs and Infs
+    mask_nan = ~np.isfinite(signal)
+    signal[mask_nan] = 0
 
-    # Clip the convolved signal to the signal length
-    arr_conv = arr_conv[centered(arr_conv.shape[0], n_sample_2), :, :]
+    # Pre-allocate array
+    n_s = n_sample_1 + n_sample_2
+    big_shape = np.array((n_s, n_kernel))
+    arr_conv = np.zeros((n_sample_2, n_kernel, n_signal), dtype=np.complex)
+
+    # Pre-compute `FFT Kernel` and `FFT Energy`
+    big_kernel = np.zeros(big_shape, dtype=complex)
+    big_kernel[centered(n_s, n_sample_1), :] = kernel[:, :]
+    fft_kernel = fft(np.fft.ifftshift(big_kernel, axes=0), axis=0)
+    fft_energy = fft(np.fft.ifftshift(np.abs(big_kernel**2), axes=0), axis=0)
+
+    # Iterate over each signal dimension
+    for s_i in range(n_signal):
+
+        # Convolve main signal with kernel
+        big_signal = np.zeros(big_shape, dtype=complex)
+        big_signal[centered(n_s, n_sample_2), :] = \
+                signal[:, s_i].reshape(-1, 1)
+        fft_signal = fft(big_signal, axis=0)
+        fft_sigkern = fft_signal * fft_kernel
+
+        # Handle NaN interpolation
+        big_signal = 0 * np.asarray(big_signal, dtype=complex)
+        big_signal[centered(n_s, n_sample_2), :] = \
+                (1.0 - mask_nan[:, s_i]).reshape(-1, 1)
+        fft_missing = fft(big_signal, axis=0)
+        fft_missnrg = fft_missing * fft_energy
+        missnrg = np.sqrt(ifft(fft_missnrg, axis=0).real)
+
+        # Final inverse transform gives the convolution,
+        # normalized by segment of valid kernel (non-NaN portion)
+        sigkern_missnrg = ifft(fft_sigkern, axis=0) / missnrg
+        sigkern_missnrg[missnrg < (10 * np.finfo(missnrg.dtype).eps)] = 0.0
+
+        # Clip the convolved signal to the signal length
+        arr_conv[:, :, s_i] = sigkern_missnrg[centered(n_s, n_sample_2), :]
+
+        # Put NaN back
+        if not interp_nan:
+            arr_conv[mask_nan[:, s_i], :, s_i] = np.nan
 
     # Remove the mirrored buffer
     if boundary == 'mirror':
@@ -78,10 +138,6 @@ def centered(curr_size, new_size):
 
     curr_size = int(curr_size)
     new_size = int(new_size)
-    if new_size >= curr_size:
-        raise ValueError('New size must be shorter than the current size.')
 
-    startind = (curr_size - new_size) // 2
-    endind = startind + new_size
-
-    return np.array(np.arange(startind, endind), dtype=np.int)
+    center = curr_size - (curr_size + 1) // 2
+    return slice(center - (new_size) // 2, center + (new_size + 1) // 2)
