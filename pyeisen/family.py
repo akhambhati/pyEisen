@@ -59,7 +59,7 @@ def morlet(freqs, cycles, Fs, n_win=7, complete=True):
     st = cycles / (2 * np.pi * freqs)
 
     # Support length for the wavelet (length in samples)
-    max_len = np.max(np.ceil(st * Fs * n_win))
+    max_len = int(np.max(np.ceil(st * Fs * n_win)))
 
     # Scaling factor for the wavelet.
     # Depends on frequency, cycles, support length, and sampling frequency.
