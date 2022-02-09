@@ -46,8 +46,6 @@ def fconv(kernel,
     # get the number of signals and samples in each input
     n_sample_1, n_kernel = kernel.shape
     n_sample_2, n_signal = signal.shape
-    if n_sample_1 > n_sample_2:
-        raise ValueError('Kernel cannot have greater length than signal.')
     n_s = n_sample_1 + n_sample_2
 
     # Handle boundary case
