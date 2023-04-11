@@ -60,7 +60,7 @@ def fconv(kernel,
     signal[mask_nan] = 0
 
     # Pre-allocate array
-    arr_conv = np.zeros((n_sample_2, n_kernel, n_signal), dtype=np.complex)
+    arr_conv = np.zeros((n_sample_2, n_kernel, n_signal), dtype=complex)
 
     # Pre-compute `FFT Kernel`
     try:
