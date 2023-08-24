@@ -1,0 +1,15 @@
+{
+  "_output_dir": "/userdata/akhambhati/Repos/akhambhati.github.com",
+  "_repo_dir": "/home/akhambhati/.cookiecutters/cookiecutter-hypermodern-python",
+  "_template": "gh:cjolowicz/cookiecutter-hypermodern-python",
+  "author": "Ankit Khambhati",
+  "copyright_year": "2023",
+  "development_status": "Development Status :: 4 - Beta",
+  "email": "akhambhati@gmail.com",
+  "friendly_name": "PyEisen",
+  "github_user": "akhambhati",
+  "license": "MIT",
+  "package_name": "pyeisen",
+  "project_name": "pyeisen",
+  "version": "0.0.0"
+}
