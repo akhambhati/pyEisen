@@ -1,8 +1,8 @@
 """Test cases for the family.py module."""
+import numpy as np
 import pytest
 
 from pyeisen import family
-import numpy as np
 
 
 @pytest.fixture
@@ -27,10 +27,11 @@ def test_family_definition(define_family: family.Family) -> None:
 
 
 def test_morlet() -> None:
+    """Test that the Morlet wavelet is defined and parametrized as predicted."""
     wv_fam = family.morlet(
         freqs=np.array([0.5]), cycles=np.array([6]), fs=1.0, n_win=7, complete=True
     )
-    assert type(wv_fam) == dict
+    assert type(wv_fam) is dict
     assert wv_fam["kernel"].shape == (1, 14)
     assert np.isclose(wv_fam["params"]["scales"], 1 / 0.583333333333333)
     assert wv_fam["params"]["freqs"] == np.array([0.5])
