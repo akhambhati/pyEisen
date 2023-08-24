@@ -64,14 +64,6 @@ def morlet(
         A family of Morlet wavelets equal in number to the frequency/cycle
         pairs provided. Each wavelet entry spans same length but diff. decay.
     """
-    # Check Inputs:
-    if len(freqs) < 1:
-        raise ValueError("At least one frequency must be specified.")
-    if len(cycles) != len(freqs):
-        raise ValueError("Each frequency must have an associated number of cycles.")
-    if fs <= 0:
-        raise ValueError("Sampling frequency must be non-negative.")
-
     # Temporal standard deviation of the wavelet (ratio of cycles to frequency)
     st = cycles / (2 * np.pi * freqs)
 
