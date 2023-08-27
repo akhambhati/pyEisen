@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyeisen"
-version = "0.1.0"
+version = "0.1.1"
 description = "PyEisen"
 authors = ["Ankit Khambhati <akhambhati@gmail.com>"]
 license = "MIT"
