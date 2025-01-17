@@ -25,12 +25,12 @@ def _reserve_fftw_mem(
 
 
 def fconv(
-    kernel: npt.NDArray[np.complex_],
-    signal: npt.NDArray[np.float_],
+    kernel: npt.NDArray[np.complex128],
+    signal: npt.NDArray[np.float64],
     fftpack: Any = scipy.fftpack,
     boundary: Any = None,
     interp_nan: bool = True,
-) -> npt.NDArray[np.complex_]:
+) -> npt.NDArray[np.complex128]:
     """Convolve kernel bank with multidimensional signals using FFT.
 
     Parameters
