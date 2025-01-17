@@ -18,7 +18,7 @@ Changelog = "https://github.com/akhambhati/pyeisen/releases"
 [tool.poetry.dependencies]
 python = ">=3.10,<3.13"
 click = ">=8.0.1"
-numpy = "^1.25.2"
+numpy = "^2.2.1"
 scipy = "^1.11.2"
 pyfftw = "^0.13.1"
 
