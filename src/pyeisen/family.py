@@ -12,7 +12,7 @@ from typing import TypedDict
 
 import numpy as np
 import numpy.typing as npt
-from scipy.signal import morlet as scipy_morlet
+from scipy_wavelets import morlet as scipy_morlet
 
 
 class Family(TypedDict):
