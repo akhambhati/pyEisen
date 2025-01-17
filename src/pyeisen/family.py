@@ -18,15 +18,15 @@ from .scipy_wavelets import morlet as scipy_morlet
 class Family(TypedDict):
     """Defines the wavelet family and parameters used to construct kernels."""
 
-    kernel: npt.NDArray[np.complex_]
+    kernel: npt.NDArray[np.complex128]
     params: Dict[str, Any]
-    sample: Dict[str, npt.NDArray[np.float_]]
+    sample: Dict[str, npt.NDArray[np.float64]]
     axis_ord: Tuple[str, str]
 
 
 def morlet(
-    freqs: npt.NDArray[np.float_],
-    cycles: npt.NDArray[np.int_],
+    freqs: npt.NDArray[np.float64],
+    cycles: npt.NDArray[np.int64],
     fs: float,
     n_win: int = 7,
     complete: bool = True,
