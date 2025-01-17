@@ -20,7 +20,7 @@ python = ">=3.10,<3.13"
 click = ">=8.0.1"
 numpy = "^2.2.1"
 scipy = "^1.11.2"
-pyfftw = "^0.13.1"
+pyfftw = "^0.15"
 
 [tool.poetry.dev-dependencies]
 Pygments = ">=2.10.0"
